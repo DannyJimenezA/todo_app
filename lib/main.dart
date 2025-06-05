@@ -72,39 +72,56 @@ class _HomePageState extends State<HomePage> {
                 labelText: 'Nueva tarea',
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.add),
-                  onPressed:
-                      _addTask, // Esto ejecuta la función _addTask al hacer clic en el ícono
+                  onPressed: _addTask, 
                 ),
               ),
-              onSubmitted:
-                  (_) =>
-                      _addTask(), // También agrega la tarea cuando presionas enter
+              onSubmitted: (_) => _addTask(),
             ),
             const SizedBox(height: 20),
             Expanded(
-              child:
-                  tasks.isEmpty
-                      ? const Text('No hay tareas')
-                      : ListView.builder(
-                        itemCount: tasks.length,
-                        itemBuilder: (context, index) {
-                          final task = tasks[index];
-                          return Dismissible(
-                            key: Key(task.id.toString()),
-                            onDismissed: (_) => _deleteTask(task.id!),
-                            background: Container(
-                              color: Colors.red,
-                              alignment: Alignment.centerRight,
-                              padding: const EdgeInsets.only(right: 20),
-                              child: const Icon(
-                                Icons.delete,
-                                color: Colors.white,
+              child: tasks.isEmpty
+                  ? const Text('No hay tareas')
+                  : ListView.builder(
+                      itemCount: tasks.length,
+                      itemBuilder: (context, index) {
+                        final task = tasks[index];
+                        return Dismissible(
+                          key: Key(task.id.toString()),
+                          onDismissed: (_) => _deleteTask(task.id!), 
+                          background: Container(
+                            color: Colors.red,
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.only(right: 20),
+                            child: const Icon(Icons.delete, color: Colors.white),
+                          ),
+                          child: ListTile(
+                            title: Text(
+                              task.title,
+                              style: TextStyle(
+                                decoration: task.isCompleted
+                                    ? TextDecoration.lineThrough 
+                                    : null,
                               ),
                             ),
-                            child: ListTile(title: Text(task.title)),
-                          );
-                        },
-                      ),
+                            trailing: IconButton(
+                              icon: Icon(
+                                task.isCompleted
+                                    ? Icons.check_box 
+                                    : Icons.check_box_outline_blank, 
+                                color: task.isCompleted ? Colors.green : Colors.grey,
+                              ),
+                              onPressed: () async {
+                                setState(() {
+                                  task.isCompleted = !task.isCompleted;
+                                });
+                                await dbHelper.updateTaskCompletion(task);
+                                _loadTasks(); 
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    ),
             ),
           ],
         ),
